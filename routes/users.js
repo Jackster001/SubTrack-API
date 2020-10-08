@@ -105,16 +105,9 @@ router.get('/:id', passport.authenticate('jwt', { session: false }),
 // @access Private
 router.post('/add-subscription', async(req, res)=>{
     try{
-        const {id, subscriptionData} = req.body;
+        const {id, subData} = req.body;
         const user = await User.findOne({_id: id})
-        await user.subscriptions.unshift(subscriptionData)
-        const userInfo= {
-            id: user._id, 
-            email: user.email, 
-            firstName: user.firstName, 
-            lastName: user.lastName, 
-            subscription: user.subscription
-        }
+        await user.subscriptions.unshift(subData)
         await User.updateOne({_id: id}, { $set: {subscriptions: user.subscriptions}})
         return res.status(200).json(userInfo)
     }catch(err){
