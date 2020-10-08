@@ -4,9 +4,27 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const keys = require('../config/keys');
 var passport =  require('passport');
+const nodemailer = require("nodemailer");
 
 //Load User Model
 const User = require('../models/user');
+
+var transporter;
+//Prepare mailer
+async function mailerMain(){
+    try{
+        transporter = await nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+            user: "hardworkinghawks@gmail.com",
+            pass: "Hawks654321", 
+            },
+        });
+    }catch(err){
+        console.log(err)
+    }
+}
+mailerMain();
 
 // @route POST api/users/register
 // @desc Register a User
@@ -30,8 +48,16 @@ router.post('/register', async (req, res)=>{
               resolve(hash)
             });
         })
+
         newUser.password = hashedPassword.toString();
         newUser.save()
+        await transporter.sendMail({
+            from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
+            to: `${email}`, // list of receivers
+            subject: "Your Account is Registered!", // Subject line
+            html: `<p>Thank you for registering for an account with us!</p>`, // html body
+        });
+
         return res.json(newUser)
     }catch(error){
         throw error
@@ -109,6 +135,12 @@ router.post('/add-subscription', async(req, res)=>{
         const user = await User.findOne({_id: id})
         await user.subscriptions.unshift(subData)
         await User.updateOne({_id: id}, { $set: {subscriptions: user.subscriptions}})
+        await transporter.sendMail({
+            from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
+            to: `${email}`, // list of receivers
+            subject: "New Subscription has been added", // Subject line
+            html: `<p>You have registered ${subData.title} to Subtrack!</p>`, // html body
+        });
         return res.status(200).json(userInfo)
     }catch(err){
         res.status(404).json(err)
