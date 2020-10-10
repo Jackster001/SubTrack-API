@@ -141,7 +141,6 @@ router.post('/add-subscription', async(req, res)=>{
         //     subject: "New Subscription has been added", // Subject line
         //     html: `<p>You have registered ${subData.title} to Subtrack!</p>`, // html body
         // });
-        console.log(user)
         return res.status(200).json(user)
     }catch(err){
         res.status(404).json(err)
@@ -154,7 +153,6 @@ router.post('/add-subscription', async(req, res)=>{
 router.post('/delete-subscription', async(req, res)=>{
     try{
         const {id, i} = req.body;
-        console.log(id)
         const user = await User.findOne({_id:id})
         await user.subscriptions.splice(i,1)
         await User.updateOne({_id: id}, { $set: {subscriptions: user.subscriptions}})

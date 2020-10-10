@@ -5,6 +5,9 @@
   "main": "index.js",
   "author": "Hard-working Hawks",
   "license": "ISC",
+  "engines": {
+    "node": "10.13.0"
+  },
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js"
