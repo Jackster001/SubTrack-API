@@ -134,14 +134,23 @@ router.post('/add-subscription', async(req, res)=>{
         const {id, subData} = req.body;
         const user = await User.findOne({_id: id})
         await user.subscriptions.unshift(subData)
+        const userInfo= {
+            id: user._id, 
+            email: user.email, 
+            firstName: user.firstName, 
+            lastName: user.lastName, 
+            subscriptions: user.subscriptions
+        }
         await User.updateOne({_id: id}, { $set: {subscriptions: user.subscriptions}})
+        console.log("info " + userInfo.subscriptions);
+        return res.status(200).json(userInfo)
+        // keeping this for next time
         // await transporter.sendMail({
         //     from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
         //     to: `${email}`, // list of receivers
         //     subject: "New Subscription has been added", // Subject line
         //     html: `<p>You have registered ${subData.title} to Subtrack!</p>`, // html body
         // });
-        return res.status(200).json(user)
     }catch(err){
         res.status(404).json(err)
     }
