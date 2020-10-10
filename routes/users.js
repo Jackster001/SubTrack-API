@@ -4,9 +4,27 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const keys = require('../config/keys');
 var passport =  require('passport');
+const nodemailer = require("nodemailer");
 
 //Load User Model
 const User = require('../models/user');
+
+var transporter;
+//Prepare mailer
+async function mailerMain(){
+    try{
+        transporter = await nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+            user: "hardworkinghawks@gmail.com",
+            pass: "Hawks654321", 
+            },
+        });
+    }catch(err){
+        console.log(err)
+    }
+}
+mailerMain();
 
 // @route POST api/users/register
 // @desc Register a User
@@ -30,8 +48,16 @@ router.post('/register', async (req, res)=>{
               resolve(hash)
             });
         })
+
         newUser.password = hashedPassword.toString();
         newUser.save()
+        await transporter.sendMail({
+            from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
+            to: `${email}`, // list of receivers
+            subject: "Your Account is Registered!", // Subject line
+            html: `<p>Thank you for registering for an account with us!</p>`, // html body
+        });
+
         return res.json(newUser)
     }catch(error){
         throw error
@@ -118,6 +144,13 @@ router.post('/add-subscription', async(req, res)=>{
         await User.updateOne({_id: id}, { $set: {subscriptions: user.subscriptions}})
         console.log("info " + userInfo.subscriptions);
         return res.status(200).json(userInfo)
+        // keeping this for next time
+        // await transporter.sendMail({
+        //     from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
+        //     to: `${email}`, // list of receivers
+        //     subject: "New Subscription has been added", // Subject line
+        //     html: `<p>You have registered ${subData.title} to Subtrack!</p>`, // html body
+        // });
     }catch(err){
         res.status(404).json(err)
     }
@@ -131,15 +164,9 @@ router.post('/delete-subscription', async(req, res)=>{
         const {id, i} = req.body;
         const user = await User.findOne({_id:id})
         await user.subscriptions.splice(i,1)
-        const userInfo= {
-            id: user._id, 
-            email: user.email, 
-            firstName: user.firstName, 
-            lastName: user.lastName, 
-            subscriptions: user.subscriptions
-        }
         await User.updateOne({_id: id}, { $set: {subscriptions: user.subscriptions}})
-        return res.status(200).json(userInfo)
+        console.log(user)
+        return res.status(200).json(user)
     }catch(err){
         res.status(404).json(err)
     }
@@ -148,7 +175,7 @@ router.post('/delete-subscription', async(req, res)=>{
 // @route update users/update-subscription
 // @desc update a subscription
 // @access Private
-router.post('/update-job', async(req, res)=>{
+router.post('/update-subscription', async(req, res)=>{
     try{
         const {id, subData, i} = req.body;
         const user = await User.findOne({_id: id})
