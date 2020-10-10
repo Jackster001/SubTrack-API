@@ -135,13 +135,14 @@ router.post('/add-subscription', async(req, res)=>{
         const user = await User.findOne({_id: id})
         await user.subscriptions.unshift(subData)
         await User.updateOne({_id: id}, { $set: {subscriptions: user.subscriptions}})
-        await transporter.sendMail({
-            from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
-            to: `${email}`, // list of receivers
-            subject: "New Subscription has been added", // Subject line
-            html: `<p>You have registered ${subData.title} to Subtrack!</p>`, // html body
-        });
-        return res.status(200).json(userInfo)
+        // await transporter.sendMail({
+        //     from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
+        //     to: `${email}`, // list of receivers
+        //     subject: "New Subscription has been added", // Subject line
+        //     html: `<p>You have registered ${subData.title} to Subtrack!</p>`, // html body
+        // });
+        console.log(user)
+        return res.status(200).json(user)
     }catch(err){
         res.status(404).json(err)
     }
@@ -153,17 +154,12 @@ router.post('/add-subscription', async(req, res)=>{
 router.post('/delete-subscription', async(req, res)=>{
     try{
         const {id, i} = req.body;
+        console.log(id)
         const user = await User.findOne({_id:id})
         await user.subscriptions.splice(i,1)
-        const userInfo= {
-            id: user._id, 
-            email: user.email, 
-            firstName: user.firstName, 
-            lastName: user.lastName, 
-            subscriptions: user.subscriptions
-        }
         await User.updateOne({_id: id}, { $set: {subscriptions: user.subscriptions}})
-        return res.status(200).json(userInfo)
+        console.log(user)
+        return res.status(200).json(user)
     }catch(err){
         res.status(404).json(err)
     }
@@ -172,7 +168,7 @@ router.post('/delete-subscription', async(req, res)=>{
 // @route update users/update-subscription
 // @desc update a subscription
 // @access Private
-router.post('/update-job', async(req, res)=>{
+router.post('/update-subscription', async(req, res)=>{
     try{
         const {id, subData, i} = req.body;
         const user = await User.findOne({_id: id})
