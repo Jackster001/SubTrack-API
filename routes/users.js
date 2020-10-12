@@ -39,9 +39,8 @@ const getDays = (date) => {
 //Send emails to each user if their subscription is under 7 days due - executes once on launch and once every 12 hours
 const sendEmails = async () => {
   let count = await User.count({});
-  console.log(count);
     User.find({}, async function (err,users) {
-        console.log("users " + users);
+    console.log("users " + users);
       for (let user of users) {
         for (sub of user.subscriptions) {
           if (sub && getDays(sub.date) < 7) {
@@ -196,19 +195,17 @@ router.post("/add-subscription", async (req, res) => {
       lastName: user.lastName,
       subscriptions: user.subscriptions,
     };
+    await transporter.sendMail({
+        from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
+        to: `${user.email}`, // list of receivers
+        subject: "New Subscription has been added", // Subject line
+        html: `<p>You have registered ${subData.title} to Subtrack!</p>`, // html body
+    });
     await User.updateOne(
       { _id: id },
       { $set: { subscriptions: user.subscriptions } }
     );
-    console.log("info " + userInfo.subscriptions);
     return res.status(200).json(userInfo);
-    // keeping this for next time
-    // await transporter.sendMail({
-    //     from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
-    //     to: `${email}`, // list of receivers
-    //     subject: "New Subscription has been added", // Subject line
-    //     html: `<p>You have registered ${subData.title} to Subtrack!</p>`, // html body
-    // });
   } catch (err) {
     res.status(404).json(err);
   }
@@ -222,12 +219,18 @@ router.post("/delete-subscription", async (req, res) => {
     const { id, i } = req.body;
     const user = await User.findOne({ _id: id });
     await user.subscriptions.splice(i, 1);
+    const userInfo = {
+      id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      subscriptions: user.subscriptions,
+    };
     await User.updateOne(
       { _id: id },
       { $set: { subscriptions: user.subscriptions } }
     );
-    console.log(user);
-    return res.status(200).json(user);
+    return res.status(200).json(userInfo);
   } catch (err) {
     res.status(404).json(err);
   }
