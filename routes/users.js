@@ -219,11 +219,18 @@ router.post("/delete-subscription", async (req, res) => {
     const { id, i } = req.body;
     const user = await User.findOne({ _id: id });
     await user.subscriptions.splice(i, 1);
+    const userInfo = {
+      id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      subscriptions: user.subscriptions,
+    };
     await User.updateOne(
       { _id: id },
       { $set: { subscriptions: user.subscriptions } }
     );
-    return res.status(200).json(user);
+    return res.status(200).json(userInfo);
   } catch (err) {
     res.status(404).json(err);
   }
