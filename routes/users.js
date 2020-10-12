@@ -38,7 +38,6 @@ const getDays = (date) => {
 
 //Send emails to each user if their subscription is under 7 days due - executes once on launch and once every 12 hours
 const sendEmails = async () => {
-  let count = await User.count({});
     User.find({}, async function (err,users) {
     console.log("users " + users);
       for (let user of users) {
@@ -49,13 +48,13 @@ const sendEmails = async () => {
               from: '"Hardworking Hawks" hardworkinghawks@gmail.com', // sender address
               to: `${user.email}`, // list of receivers
               subject: `You have an upcoming payment due for ${sub.title}!`, // Subject line
-              html: `<p>Thanks for using SubTrack! We're emailing to let you know that your payment for ${sub.title} of ${sub.price} is due in less than a week! <br/> Take care!</p>`, // html body
+              html: `<p>Thanks for using SubTrack! We're emailing to let you know that your payment for ${sub.title} of $${sub.price} is due in less than a week! <br/> Take care!</p>`, // html body
             });
           }
         }
       }
     })
-  setTimeout(sendEmails, 3.6 * 1000000);
+  setTimeout(sendEmails, 60000);
 };
 
 sendEmails();
