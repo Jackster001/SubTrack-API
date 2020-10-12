@@ -241,6 +241,7 @@ router.post("/update-subscription", async (req, res) => {
     const { id, subData, i } = req.body;
     const user = await User.findOne({ _id: id });
     subData.remain = getDays(subData.date);
+    subData.email = user.subscriptions[i].email;
     user.subscriptions[i] = subData;
     const userInfo = {
       id: user._id,
